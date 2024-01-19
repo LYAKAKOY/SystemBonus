@@ -1,6 +1,6 @@
 import uuid
 from db.base import Base
-from sqlalchemy import String
+from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 
@@ -11,3 +11,5 @@ class User(Base):
     )
     phone: Mapped[str] = mapped_column(String(11), unique=True, index=True)
     password: Mapped[str]
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, server_default=False)
+    is_verified_phone: Mapped[bool] = mapped_column(Boolean, default=False, server_default=False)
