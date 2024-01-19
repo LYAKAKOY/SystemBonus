@@ -7,4 +7,4 @@ async def get_redis():
     try:
         yield session
     finally:
-        await session.close()
+        await session.aclose()
