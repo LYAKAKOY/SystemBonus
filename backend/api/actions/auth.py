@@ -1,4 +1,10 @@
+import json
 import uuid
+
+import aiohttp
+from aiohttp.web_response import Response
+
+import settings
 from api.handlers.schemas import CreatedUser
 from db.users.models import User
 from db.users.user_dal import UserDAL
@@ -37,9 +43,29 @@ async def authenticate_user(phone: str, password: str, db: AsyncSession) -> User
     return user
 
 
+async def send_message_to_whatsapp(phone: str, message: str) -> Response:
+    data = json.dumps(
+        {
+            "to": f"{phone}@s.whatsapp.net",
+            "ephemeral": 900,
+            "body": f"{message}",
+            "typing_time": 0,
+            "view_once": True,
+        }
+    )
+    headers = {
+        "Authorization": f"Bearer {settings.TOKEN_WHATSAPP}",
+        "Content-Type": "application/json",
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(settings.URL_MESSANGER, data=data, headers=headers) as response:
+            return response
+
+
 async def _create_user(phone: str, password: str, session: AsyncSession) -> CreatedUser | None:
     async with session.begin():
         user_dal = UserDAL(session)
         user = await user_dal.create_user(phone=phone, password=Hasher.get_password_hash(password))
         if user:
             return CreatedUser(user_id=user.user_id)
+
