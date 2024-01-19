@@ -11,5 +11,5 @@ class User(Base):
     )
     phone: Mapped[str] = mapped_column(String(11), unique=True, index=True)
     password: Mapped[str]
-    is_active: Mapped[bool] = mapped_column(Boolean, default=False, server_default=False)
-    is_verified_phone: Mapped[bool] = mapped_column(Boolean, default=False, server_default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_verified_phone: Mapped[bool] = mapped_column(Boolean, default=False)
