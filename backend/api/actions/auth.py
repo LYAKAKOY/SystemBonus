@@ -1,4 +1,5 @@
 import uuid
+from api.handlers.schemas import CreatedUser
 from db.users.models import User
 from db.users.user_dal import UserDAL
 from fastapi import HTTPException
@@ -34,3 +35,11 @@ async def authenticate_user(phone: str, password: str, db: AsyncSession) -> User
     if not Hasher.verify_password(password, user.password):
         raise credentials_exception
     return user
+
+
+async def _create_user(phone: str, password: str, session: AsyncSession) -> CreatedUser | None:
+    async with session.begin():
+        user_dal = UserDAL(session)
+        user = await user_dal.create_user(phone=phone, password=Hasher.get_password_hash(password))
+        if user:
+            return CreatedUser(user_id=user.user_id)
