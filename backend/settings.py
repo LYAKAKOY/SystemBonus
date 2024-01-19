@@ -6,7 +6,7 @@ from envparse import Env
 
 env = Env()
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent
 
 ALLOW_ORIGINS: List = env.list(
     "ALLOW_ORIGINS",
@@ -14,6 +14,11 @@ ALLOW_ORIGINS: List = env.list(
         "http://localhost",
         "http://localhost:8000",
     ],
+)
+
+REDIS_URL = env.str(
+    "REDIS_URL",
+    default=f"redis://{os.environ.get('REDIS_DB')}:{os.environ.get('REDIS_PORT')}"
 )
 
 DATABASE_URL = env.str(
