@@ -1,5 +1,9 @@
 import uuid
-from db.users.models import User
+from typing import List
+
+from sqlalchemy.orm import joinedload
+
+from db.users.models import User, Profile
 from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
@@ -37,7 +41,7 @@ class UserDAL:
             await self.db_session.rollback()
             return
 
-    async def update_user(self, user_id: uuid.UUID, **kwargs):
+    async def update_user(self, user_id: uuid.UUID, **kwargs) -> uuid.UUID | None:
         query = (
             update(User)
             .where(User.user_id == user_id)
@@ -47,11 +51,11 @@ class UserDAL:
         try:
             update_user_id_row = await self.db_session.scalar(query)
             await self.db_session.commit()
+            if update_user_id_row is not None:
+                return update_user_id_row
         except IntegrityError:
             await self.db_session.rollback()
             return
-        if update_user_id_row is not None:
-            return update_user_id_row
 
     async def get_user_by_phone(self, phone: str) -> User | None:
         query = select(User).where(User.phone == phone)
@@ -63,3 +67,26 @@ class UserDAL:
         user = await self.db_session.get(User, user_id)
         if user is not None:
             return user
+
+
+class ProfileDAL:
+    def __init__(self, db_session: AsyncSession):
+        self.db_session = db_session
+
+    async def create_profile(self, user_id: uuid.UUID, first_name: str, last_name: str, bonuses: int = 0) \
+            -> Profile | None:
+        new_profile = Profile(user_id=user_id, first_name=first_name, last_name=last_name, bonuses=bonuses)
+        try:
+            self.db_session.add(new_profile)
+            await self.db_session.flush()
+            await self.db_session.commit()
+            return new_profile
+        except IntegrityError:
+            await self.db_session.rollback()
+            return
+
+    async def get_all_profiles(self) -> List[Profile] | None:
+        query = select(Profile).options(joinedload(Profile.user)).order_by(Profile.user_id)
+        profiles = await self.db_session.scalars(query)
+        if profiles is not None:
+            return profiles
