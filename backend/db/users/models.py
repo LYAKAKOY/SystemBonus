@@ -22,7 +22,7 @@ class Profile(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), unique=True)
     first_name: Mapped[str] = mapped_column(String(20))
     last_name: Mapped[str] = mapped_column(String(40))
-    bonuses: Mapped[int] = mapped_column(BigInteger)
+    bonuses: Mapped[int] = mapped_column(BigInteger, default=0)
 
     user: Mapped[User] = relationship(User, back_populates="profile")
 
