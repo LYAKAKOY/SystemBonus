@@ -37,6 +37,22 @@ class UserDAL:
             await self.db_session.rollback()
             return
 
+    async def update_user(self, user_id, **kwargs):
+        query = (
+            update(User)
+            .where(User.user_id == user_id)
+            .values(kwargs)
+            .returning(User.user_id)
+        )
+        try:
+            update_user_id_row = await self.db_session.scalar(query)
+            await self.db_session.commit()
+        except IntegrityError:
+            await self.db_session.rollback()
+            return
+        if update_user_id_row is not None:
+            return update_user_id_row
+
     async def get_user_by_phone(self, phone: str) -> User | None:
         query = select(User).where(User.phone == phone)
         user = await self.db_session.scalar(query)
