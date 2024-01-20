@@ -37,7 +37,7 @@ class UserDAL:
             await self.db_session.rollback()
             return
 
-    async def update_user(self, user_id, **kwargs):
+    async def update_user(self, user_id: uuid.UUID, **kwargs):
         query = (
             update(User)
             .where(User.user_id == user_id)
