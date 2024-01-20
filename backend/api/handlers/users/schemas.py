@@ -2,12 +2,12 @@ import uuid
 from typing import Annotated
 from annotated_types import MinLen, MaxLen
 from fastapi import HTTPException
-from pydantic import field_validator
+from pydantic import field_validator, BaseModel
 
 from api.base_schemas import TunedModel
 
 
-class CreateUser(TunedModel):
+class CreateUser(BaseModel):
     phone: Annotated[str, MinLen(11), MaxLen(11)]
     password: Annotated[str, MinLen(4)]
 
@@ -42,3 +42,10 @@ class CreatedUser(TunedModel):
 
 class UpdatedUser(TunedModel):
     user_id: uuid.UUID
+
+
+class ShowProfileUser(TunedModel):
+    phone: Annotated[str, MinLen(11), MaxLen(11)]
+    first_name: str
+    last_name: str
+    bonuses: int
